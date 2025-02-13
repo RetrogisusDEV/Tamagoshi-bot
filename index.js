@@ -6,7 +6,14 @@ const TelegramBot = require("node-telegram-bot-api");
 require("dotenv").config();
 
 const token = process.env.BOT_TOKEN;
-const db = JSON.parse(readFileSync("./db.json"));
+let db;
+try {
+    db = JSON.parse(readFileSync("./db.json"));
+} catch (error) {
+    console.error("Error reading db.json:", error);
+    db = {}; // Initialize db as an empty object if reading fails
+}
+
 const interval = [];
 const PING_HOST = "8.8.8.8";
 const PING_INTERVAL = 3600000; // 1 hour
@@ -59,16 +66,13 @@ function getMachineStats() {
 }
 
 // Function to write to database (improved error handling)
-async function writeDB() {
-    return new Promise((resolve, reject) => {
-        writeFile("db.json", JSON.stringify(db, null, 2), "utf8", (err) => {
-            if (err) {
-                console.error("Error writing to database:", err);
-                return reject(err);
-            }
-            resolve();
-        });
-    });
+function writeDB() {
+    try {
+        writeFile("db.json", JSON.stringify(db, null, 2), "utf8");
+        console.log("Database written successfully.")
+    }catch(err){
+        console.error("Database written error.")
+    }
 }
 
 // Initialize database (uses async/await for clarity)
