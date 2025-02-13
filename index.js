@@ -58,6 +58,7 @@ function getMachineStats() {
     };
 }
 
+// Function to write to database (improved error handling)
 async function writeDB() {
     return new Promise((resolve, reject) => {
         writeFile("db.json", JSON.stringify(db, null, 2), "utf8", (err) => {
@@ -69,17 +70,8 @@ async function writeDB() {
         });
     });
 }
-    return new Promise((resolve, reject) => {
-        writeFile("db.json", JSON.stringify(db, null, 2), "utf8", (err) => {
-            if (err) {
-                console.error("Error writing to database:", err);
-                return reject(err);
-            }
-            resolve();
-        });
-    });
-}
 
+// Initialize database (uses async/await for clarity)
 async function dbInit(id, obj) {
     if (!db[id]) {
         db[id] = { eco: {} };
@@ -110,14 +102,6 @@ async function renamePet(msg) {
     } else {
         await bot.sendMessage(msg.chat.id, "Please provide a name to rename your pet.");
     }
-}
-    if (!db[id]) {
-        db[id] = { eco: {} };
-    }
-    if (db[id].eco[obj] === undefined) {
-        db[id].eco[obj] = 0;
-    }
-    await writeDB();
 }
 
 // Economy functions (using async/await for write operations)
@@ -157,7 +141,6 @@ async function pet(msg) {
     let attention = await eco.Read(msg.from.id, "attention");
     let hunger = await eco.Read(msg.from.id, "hunger");
     let health = await eco.Read(msg.from.id, "health");
-
 
     if (mood === 0) { // Default values if mood is 0
         mood = "unhappy";
@@ -211,10 +194,8 @@ async function pet(msg) {
     await eco.Set(msg.from.id, "health", health);
     await eco.Set(msg.from.id, "attention", attention);
 
-
     lastConnection = Date.now();
     eco.Set(msg.from.id, "lastConnection", lastConnection);
-
 }
 
 const bot = new TelegramBot(token, { polling: true });
@@ -259,12 +240,10 @@ bot.on("message", async (msg) => {
                     "Your profession rank is: " + (await eco.Read(msg.from.id, "job")));
                 await eco.Add(msg.from.id, "money", gain);
                 await eco.Add(msg.from.id, "experience", experience);
-                await eco.Add(msg.from.id, "experience", experience);
                 break;
             case text.startsWith('/stoptowork' || text.startsWith('.stoptowork')):
                 pet(msg);
                 await bot.sendMessage(msg.chat.id, "You've called your pet back from work.");
-                clearInterval(interval[msg.from.id]);
                 clearInterval(interval[msg.from.id]);
                 break;
             case text.startsWith('/ping') || text.startsWith('.ping'):
@@ -397,6 +376,7 @@ bot.on("message", async (msg) => {
                 });
                 await bot.sendMessage(msg.chat.id,
                     "Status and statistics of your virtual pet:\n" +
+                    "```Name: " + (await eco.Read(msg.from.id, "petName") || "Unnamed") + "\n" +
                     "```mood\n" +
                     mood + " | " + status +
                     "```" +
