@@ -134,6 +134,46 @@ async function build() {
 
 build();
 
+
+// Function to determine mood based on attention and love
+function determineMood(attention, love) {
+    if (attention > 70 && love > 70) {
+        return "happy";
+    } else if (love > 50 && attention < 30) {
+        return "sad";
+    } else if (love < 30 && attention < 30) {
+        return "unhappy";
+    } else if (attention > 50) {
+        return "content";
+    } else {
+        return "neutral";
+    }
+}
+
+// Function to determine health status based on health and mood
+function determineHealthStatus(health, mood) {
+    if (health < 30) {
+        return "sick";
+    } else if (mood === "unhappy") {
+        return "unwell";
+    } else {
+        return "healthy";
+    }
+}
+
+// Function to determine status based on hunger, health, and mood
+function determineStatus(hunger, health, mood) {
+    if (hunger > 70 && health < 30) {
+        return "starving";
+    } else if (health < 50) {
+        return "weak";
+    } else if (mood === "happy") {
+        return "thriving";
+    } else {
+        return "normal";
+    }
+}
+
 async function pet(msg) {
     let mood = await eco.Read(msg.from.id, "mood");
     let status = await eco.Read(msg.from.id, "status");
@@ -206,8 +246,8 @@ bot.onText(/\/start/, (msg) => {
     bot.sendMessage(
         msg.chat.id,
         "Welcome, this is a \"simple\" entertainment bot, we are currently improving our service.\n" +
-            "You are given a virtual pet that you must take care of and teach so that it can keep you company..." +
-            " Using the bot is simple; you can use the /help commands or the .help commands for your convenience."
+        "You are given a virtual pet that you must take care of and teach so that it can keep you company..." +
+        " Using the bot is simple; you can use the /help commands or the .help commands for your convenience."
     );
 });
 
@@ -230,7 +270,7 @@ bot.on("message", async (msg) => {
                 await bot.sendMessage(
                     msg.chat.id,
                     "Vote for the bot, and help it reach more people, we currently have no way of knowing if you did it or not, settle for a good cause " +
-                    "[Vote](https://t.me/dailychannelsbot?start=tamagochi_neko_bot)", {parse_mode: "MarkdownV2"});
+                    "[Vote](https://t.me/dailychannelsbot?start=tamagochi_neko_bot)", { parse_mode: "MarkdownV2" });
                 break;
             case text.startsWith('/work') || text.startsWith('.work'):
                 pet(msg);
@@ -328,7 +368,7 @@ bot.on("message", async (msg) => {
                     "os\n" +
                     "\n```"
                     ,
-                    {parse_mode: "MarkdownV2"});
+                    { parse_mode: "MarkdownV2" });
                 break;
             case text.startsWith('/cvupgrade') || text.startsWith('.cvupgrade'):
                 let cost = (await eco.Read(msg.from.id, "job") + await eco.Read(msg.from.id, "job")) * 1000;
