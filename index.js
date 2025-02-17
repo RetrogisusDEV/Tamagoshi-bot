@@ -4,15 +4,8 @@ const { readFileSync, writeFile } = require("fs");
 const ping = require("ping");
 const TelegramBot = require("node-telegram-bot-api");
 require("dotenv").config();
-
+var db = JSON.parse(readFileSync("./db.json"));
 const token = process.env.BOT_TOKEN;
-let db;
-try {
-    db = JSON.parse(readFileSync("./db.json"));
-} catch (error) {
-    console.error("Error reading db.json:", error);
-    db = {}; // Initialize db as an empty object if reading fails
-}
 
 const interval = [];
 const PING_HOST = "8.8.8.8";
@@ -67,12 +60,9 @@ function getMachineStats() {
 
 // Function to write to database (improved error handling)
 function writeDB() {
-    try {
-        writeFile("db.json", JSON.stringify(db, null, 2), "utf8");
-        console.log("Database written successfully.")
-    }catch(err){
-        console.error("Database written error.")
-    }
+        writeFile("db.json", JSON.stringify(db), "utf8", (err) => {
+			if (err) throw err;
+		});
 }
 
 // Initialize database (uses async/await for clarity)
@@ -414,13 +404,14 @@ bot.on("message", async (msg) => {
                 let love = await eco.Read(msg.from.id, "love");
                 let attention = await eco.Read(msg.from.id, "attention");
                 let petImage = await eco.Read(msg.from.id, "petImage");
+				let petName = await eco.Read(msg.from.id, "petName");
                 await bot.sendPhoto(msg.chat.id, petImage, {
                     quality: 100,
                     witdh: 400
                 });
                 await bot.sendMessage(msg.chat.id,
                     "Status and statistics of your virtual pet:\n" +
-                    "```Name: " + (await eco.Read(msg.from.id, "petName") || "Unnamed") + "\n" +
+                    "```Name: Pet" + "\n" +
                     "```mood\n" +
                     mood + " | " + status +
                     "```" +
